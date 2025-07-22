@@ -5,8 +5,8 @@ resource "azurerm_resource_group" "resourcegroup" {
 resource "azurerm_virtual_network" "vnet" {
   depends_on          = [azurerm_resource_group.resourcegroup]
   name                = "vikrant-network"
-  resource_group_name = "vikrant-resources"
-  location            = "eastasia"
+  resource_group_name = azurerm_resource_group.resourcegroup.name
+  location            = azurerm_resource_group.resourcegroup.location
   address_space       = ["10.0.0.0/16"]
 
 
@@ -14,13 +14,13 @@ resource "azurerm_virtual_network" "vnet" {
 resource "azurerm_subnet" "subnet" {
     depends_on = [ azurerm_virtual_network.vnet ]
   name                 = "internal-subnet"
-  resource_group_name  = "vikrant-resources"
+  resource_group_name  = azurerm_resource_group.resourcegroup.name
   virtual_network_name = "vikrant-network"
   address_prefixes     = ["10.0.2.0/24"]
 }
 resource "azurerm_public_ip" "pip" {
   name                = "frontend-ip"
-  resource_group_name = "vikrant-resources"
+  resource_group_name = azurerm_resource_group.resourcegroup.name
   location            = "eastasia"
   allocation_method   = "Static"
    
@@ -29,7 +29,7 @@ resource "azurerm_network_interface" "nic" {
   depends_on          = [azurerm_virtual_network.vnet]
   name                = "frontend-nic"
   location            = "eastasia"
-  resource_group_name = "vikrant-resources"
+  resource_group_name = azurerm_resource_group.resourcegroup.name
 
   ip_configuration {
     name                          = "internal"
@@ -42,7 +42,7 @@ resource "azurerm_network_interface" "nic" {
 resource "azurerm_linux_virtual_machine" "vm" {
   depends_on                      = [azurerm_network_interface.nic]
   name                            = "frontend-machine"
-  resource_group_name             = "vikrant-resources"
+  resource_group_name             = azurerm_resource_group.resourcegroup.name
   location                        = "eastasia"
   size                            = "Standard_F2"
   admin_username                  = "adminuser"
